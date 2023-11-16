@@ -13,6 +13,7 @@ from veering import taut_polynomial
 from veering import transverse_taut
 from veering import carried_surface
 from veering import veering_tri
+import snappy
 
 from sage.plot.contour_plot import ContourPlot
 
@@ -54,22 +55,46 @@ m = mathematica
 
 
 def get_hom_vars(sig):
-    '''This is just an auxiliary function
-    which creates a tuple of variables of length
-    given by the dimension of the homology for the
-    given 3-manifold.'''
+    '''Auxiliary function which creates a tuple
+    of variables of length given by the dimension
+    of the homology for the 3-manifold given by
+    the sig.
+    
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+        
+    Return type
+    ___________
+    tuple(sage.symbolic.expression.Expression)
+    '''
     
     tri, angle = taut.isosig_to_tri_angle(sig)
     return tuple(var('a' + str(i)) for i in range(tri.homology().rank()))
 
 
-# In[4]:
+# In[6]:
 
 
 def get_extreme_surfs(sig): # NOT SURE IF I ACTUALLY NEED THIS FUNCTION FOR ANYTHING...
-    '''This function gets the branch equation 
+    '''DEPRECATED Gets the branch equation 
     (non-negative 2-chain) form of the surfaces 
-    which span the fibered cone.'''
+    which span the fibered cone.
+    
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    
+    Return type
+    ___________
+    list(sage.modules.vector_integer_dense.Vector_integer_dense)
+    '''
     
     tri, angle = taut.isosig_to_tri_angle(sig)
     extreme_rays = taut_polytope.cone_in_homology(sig) # rays (in homology) spanning the fibered cone.
@@ -91,24 +116,48 @@ def get_extreme_surfs(sig): # NOT SURE IF I ACTUALLY NEED THIS FUNCTION FOR ANYT
     return extreme_surfs
 
 
-# In[5]:
+# In[12]:
 
 
 def get_fibered_cone(sig):
-    '''This function gets the fibered cone
-    in homology of the given veering triangulation.'''
+    '''Builds the fibered cone in homology
+    of the given veering triangulation.
+    
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    
+    Return type
+    ___________
+    sage.geometry.cone.ConvexRationalPolyhedralCone
+    '''
     
     extreme_rays = taut_polytope.cone_in_homology(sig)
     return Cone(extreme_rays)
 
 
-# In[6]:
+# In[16]:
 
 
 def get_fibered_cone_plot(sig):
-    '''This function simply plots the fibered
-    cone. It will only work if the homology is
-    rank 2 or 3.'''
+    '''Plots the fibered cone from
+    get_fibered_cone. It will only work
+    if the homology has dimension 2 or 3.
+    
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    
+    Return type
+    ___________
+    sage.plot.graphics.Graphics
+    '''
     
     tri, angle = taut.isosig_to_tri_angle(sig)
     rank = tri.homology(1).rank()
@@ -118,14 +167,26 @@ def get_fibered_cone_plot(sig):
     return 'This function only works for manifolds with H_2(M,dM) (equivalently H_1(M)) dimension 2 or 3.'
 
 
-# In[7]:
+# In[19]:
 
 
 def get_spec(sig):
-    '''Auxiliary function for the "get_spec_at_e" function.
-    Returns the specialization of the taut polynomial at a
-    point in second homology. Also used in the get_dila_mathematica
-    function.'''
+    '''Auxiliary function for the get_spec_at_e function.
+    Returns the specialization of the taut polynomial at an
+    arbitrary point in homology. Also used in 
+    the get_dila_mathematica function.
+    
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    
+    Return type
+    ___________
+    sage.symbolic.expression.Expression
+    '''
     
     tri, angle = taut.isosig_to_tri_angle(sig)
     rank = tri.homology(1).rank()
@@ -143,25 +204,54 @@ def get_spec(sig):
     return spec
 
 
-# In[8]:
+# In[24]:
 
 
 def get_spec_at_e(sig):
     '''Returns the specialization at e of the taut
-    polynomial. Used in the "get_fibered_cone_and_levset_plot" 
-    function as well as the "get_minimal_direction" function.'''
+    polynomial. This amounts to substituting x = e
+    in the output of get_spec. Used in the
+    get_fibered_cone_and_levset_plot function as well
+    as the get_minimal_direction function.
+    
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    
+    Return type
+    ___________
+    sage.symbolic.expression.Expression
+    '''
     
     return get_spec(sig)(x = e)
 
 
-# In[9]:
+# In[30]:
 
 
 def get_fibered_cone_and_levset_plot(sig):
-    '''This function plots both the fibered
-    cone and the level set of the normalized
-    dilatation where it equals the Thurston norm.
-    Only works if the homology is dimension 2 or 3.'''
+    '''Plots both the fibered cone and the level set
+    where the dilatation is equal to e (so log of the
+    dilatation is 1). This is significant because on
+    this level set, the normalized dilatation is just
+    e^{Thurston norm} (or just equal to the Thurston
+    norm if using the log version of normalized dilatation.)
+    Only works if the homology is dimension 2 or 3.
+    
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    
+    Return type
+    ___________
+    sage.plot.graphics.Graphics
+    '''
     
     tri, angle = taut.isosig_to_tri_angle(sig)
     rank = tri.homology(1).rank()
@@ -178,13 +268,25 @@ def get_fibered_cone_and_levset_plot(sig):
     return 'This function only works for manifolds with H_2(M,dM) (equivalently H_1(M)) dimension 2 or 3.'
 
 
-# In[10]:
+# In[33]:
 
 
 def get_C2M_to_C1M(sig):
-    '''This function returns the standard boundary map
-    on 2-chains, with orientations agreeing with the
-    veering coorientations.'''
+    '''Generates the standard boundary map
+    on 2-chains, with orientations agreeing
+    with the veering coorientations.
+    
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    
+    Return type
+    ___________
+    sage.matrix.matrix_integer_dense.Matrix_integer_dense
+    '''
     
     tri, angle = taut.isosig_to_tri_angle(sig)
     tet_vert_coorientations = transverse_taut.is_transverse_taut(tri, angle, return_type = "face_coorientations") # This gives a list telling us whether the RHR orientations of the regina numbering agrees or disagrees with the veering coorientation. (See Veering repo for details)
@@ -208,16 +310,28 @@ def get_C2M_to_C1M(sig):
     return matrix(mat)
 
 
-# In[11]:
+# In[36]:
 
 
 def get_2_chain_from_point_in_homology(sig):
-    '''This function produces a 2-chain which is the
-    preimage of an arbitrary homology class, making
-    sure that the obtained 2-chain is not only a 
-    preimage under the projection from 2-chains to
-    homology, but also that it represents a homology
-    class; i.e. it is in the kernel of the boundary map'''
+    '''Produces a 2-chain which representing an
+    arbitrary homology class, making sure that the
+    obtained 2-chain is not only a preimage under
+    the projection from 2-chains to homology, but
+    also that it represents a homology class; i.e.
+    it is in the kernel of the boundary map.
+    
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    
+    Return type
+    ___________
+    sage.modules.free_module.FreeModule_ambient_field_with_category.element_class
+    '''
     
     tri, angle = taut.isosig_to_tri_angle(sig)
     hom_vars = get_hom_vars(sig)
@@ -247,13 +361,26 @@ def get_2_chain_from_point_in_homology(sig):
     return preimage
 
 
-# In[12]:
+# In[40]:
 
 
 def get_Thurston_norm(sig):
-    '''This function gets the formula for
-    the Thurston norm of our 3-manifold for
-    an arbitrary homology class'''
+    '''Gets the formula for the Thurston norm
+    of our 3-manifold in the fibered face
+    corresponding to the given veering triangulation
+    for an arbitrary homology class.
+    
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    
+    Return type
+    ___________
+    sage.symbolic.expression.Expression
+    '''
             
     surf = get_2_chain_from_point_in_homology(sig)
     # somehow the free variables from the get_2_chain_from_point_in_homology always all cancel so aren't left in the final formula
@@ -264,7 +391,7 @@ def get_Thurston_norm(sig):
     return prenorm/2
 
 
-# In[13]:
+# In[51]:
 
 
 def get_spec_with_subs(sig, point):
@@ -277,13 +404,13 @@ def get_spec_with_subs(sig, point):
         cone = get_fibered_cone(sig)
         assert cone.interior_contains(point), "The point is not in the interior of the fibered cone."
     except:
-        print("This is an example where the fibered cone is not built into the Veering taut_polytope file (not sure why). Be carefule to make sure your point is in the interior of the fibered cone.")
+        print("Either the point you entered is not in the interior of the fibered cone, or this is an example where the fibered cone is not built into the Veering taut_polytope file (not sure why). Be carefule to make sure your point is in the interior of the fibered cone.")
     
     substitute = {} # Need to make a dictionary to keep track of which variables we are substituting for which variable, since the get_spec function returns the specialization with variables and we need to plug in our point.
     for key, coord in zip(keys, point):
         substitute[key] = coord
     
-    poly = str(get_spec(sig).subs(substitute)) # substitute our point into the specialization with the variables
+    poly = get_spec(sig).subs(substitute)
     
     return poly
 
@@ -307,13 +434,14 @@ def get_dila_mathematica(sig, point): # LOOK CAREFULLY INTO THIS FUNCTION...ALL 
         cone = get_fibered_cone(sig)
         assert cone.interior_contains(point), "The point is not in the interior of the fibered cone."
     except:
-        print("This is an example where the fibered cone is not built into the Veering taut_polytope file (not sure why). Be carefule to make sure your point is in the interior of the fibered cone.")
+        print("Either the point you entered is not in the interior of the fibered cone, or this is an example where the fibered cone is not built into the Veering taut_polytope file (not sure why). Be carefule to make sure your point is in the interior of the fibered cone.")
     
-    substitute = {} # Need to make a dictionary to keep track of which variables we are substituting for which variable, since the get_spec function returns the specialization with variables and we need to plug in our point.
-    for key, coord in zip(keys, point):
-        substitute[key] = coord
+    #substitute = {} # Need to make a dictionary to keep track of which variables we are substituting for which variable, since the get_spec function returns the specialization with variables and we need to plug in our point.
+    #for key, coord in zip(keys, point):
+    #    substitute[key] = coord
     
-    poly = str(get_spec(sig).subs(substitute)) # substitute our point into the specialization with the variables
+    #poly = str(get_spec(sig).subs(substitute)) # substitute our point into the specialization with the variables
+    poly = str(get_spec_with_subs(sig, point))
     #print(poly) # For testing
     poly = poly.replace("sqrt(x)", "Sqrt[x]") # NOT SURE WHEN THIS IS A PROBLEM...MAYBE THIS IS SOMETHING THAT NEEDS TO BE LOOKED INTO MORE GENERALLY?
     #print(poly) # For testing
@@ -327,7 +455,7 @@ def get_dila_mathematica(sig, point): # LOOK CAREFULLY INTO THIS FUNCTION...ALL 
     return max(root_nums) # and return the largest
 
 
-# In[15]:
+# In[37]:
 
 
 def get_hom_dila_mathematica(sig, point): # WORK ON THIS
@@ -346,14 +474,14 @@ def get_hom_dila_mathematica(sig, point): # WORK ON THIS
         cone = get_fibered_cone(sig)
         assert cone.interior_contains(point), "The point is not in the interior of the fibered cone."
     except:
-        print("This is an example where the fibered cone is not built into the Veering taut_polytope file (not sure why). Be carefule to make sure your point is in the interior of the fibered cone.")
+        print("Either the point you entered is not in the interior of the fibered cone, or this is an example where the fibered cone is not built into the Veering taut_polytope file (not sure why). Be carefule to make sure your point is in the interior of the fibered cone.")
     
     substitute = {} # Need to make a dictionary to keep track of which variables we are substituting for which variable, since the get_spec function returns the specialization with variables and we need to plug in our point.
     for key, coord in zip(keys, point):
         substitute[key] = coord
     
     poly = str(snappy.Manifold(tri).alexander_polynomial().subs(substitute)) # NEEDS WORK HERE
-    #print(poly) # For testing
+    print(poly) # For testing
     poly = poly.replace("sqrt(x)", "Sqrt[x]") # NOT SURE WHEN THIS IS A PROBLEM...MAYBE THIS IS SOMETHING THAT NEEDS TO BE LOOKED INTO MORE GENERALLY?
     #print(poly) # For testing
     roots = m('roots = NSolve[' + poly + ' == 0, x]') # use mathematica to find the roots
@@ -412,7 +540,7 @@ def get_norm_dila_log_mathematica(sig, point):
         cone = get_fibered_cone(sig)
         assert cone.interior_contains(point), "The point is not in the interior of the fibered cone."
     except:
-        print("This is an example where the fibered cone is not built into the Veering taut_polytope file (not sure why). Be carefule to make sure your point is in the interior of the fibered cone.")
+        print("Either the point you entered is not in the interior of the fibered cone, or this is an example where the fibered cone is not built into the Veering taut_polytope file (not sure why). Be carefule to make sure your point is in the interior of the fibered cone.")
     
     substitute = {} # Need to make a dictionary to keep track of which variables we are substituting for which variable, since the get_spec function returns the specialization with variables and we need to plug in our point.
     for key, coord in zip(keys, point):
@@ -785,7 +913,7 @@ def get_num_punctures(sig, point):
         cone = get_fibered_cone(sig)
         assert cone.interior_contains(point), "The point is not in the interior of the fibered cone."
     except:
-        print("This is an example where the fibered cone is not built into the Veering taut_polytope file (not sure why). Be carefule to make sure your point is in the interior of the fibered cone.")
+        print("Either the point you entered is not in the interior of the fibered cone, or this is an example where the fibered cone is not built into the Veering taut_polytope file (not sure why). Be carefule to make sure your point is in the interior of the fibered cone.")
     
     substitution_dict = {get_hom_vars(sig)[i]:point[i] for i in range(len(point))} # substitute the given point for our variable place holders.
     #print(substitution_dict)
@@ -812,7 +940,7 @@ def get_genus(sig, point):
         cone = get_fibered_cone(sig)
         assert cone.interior_contains(point), "The point is not in the interior of the fibered cone."
     except:
-        print("This is an example where the fibered cone is not built into the Veering taut_polytope file (not sure why). Be carefule to make sure your point is in the interior of the fibered cone.")
+        print("Either the point you entered is not in the interior of the fibered cone, or this is an example where the fibered cone is not built into the Veering taut_polytope file (not sure why). Be carefule to make sure your point is in the interior of the fibered cone.")
     
     substitution_dict = {get_hom_vars(sig)[i]:point[i] for i in range(len(point))} # substitute the given point for our variable place holders.
     t_norm = get_Thurston_norm(sig).subs(substitution_dict)
@@ -825,7 +953,7 @@ def get_genus(sig, point):
 # In[31]:
 
 
-def get_num_prongs(sig, point):
+def get_num_prongs(sig, point): # DON'T THINK THIS WORKS WITH VARIABLES
     '''This function returns a list of lists.
     One list for each boundary component. The
     contents of the list is the number of prongs
