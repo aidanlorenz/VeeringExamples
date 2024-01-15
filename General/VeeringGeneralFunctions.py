@@ -1,24 +1,21 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[2]:
 
+
+# IF CHANGES ARE MADE IN THIS FILE, IT WILL NEED TO BE REDOWNLOADED AS A .PY (or maybe .ipynb) FILE
+# THEN CHANGE THE EXTENSION TO .SAGE AND MOVED TO THE GENERAL FOLDER FOR THE OTHER FILES TO LOAD IT
+# PROPERLY.
 
 from veering import taut_polytope
 from veering import taut
-from veering import taut_homology
-from veering import taut_carried
-from veering import fundamental_domain
 from veering import taut_polynomial
 from veering import transverse_taut
 from veering import carried_surface
-from veering import veering_tri
 import snappy
 
 from sage.plot.contour_plot import ContourPlot
-
-from itertools import combinations
-from itertools import permutations
 
 import numpy as np
 
@@ -27,8 +24,11 @@ import time
 m = mathematica
 
 
-# In[2]:
+# In[3]:
 
+
+sig = 'kLLLPLQkcefegijjiijiieldllxtxa_0112222011'
+# SOME INTERESTING EXAMPLES ON WHICH TO TEST
 
 # Homology dimension 1 example:
 #sig = 'cPcbbbiht_12'
@@ -51,7 +51,7 @@ m = mathematica
 #sig = 'hLLMMkaedfdgggjxaxjxqh_2002110' # Example of a dimension 2 homology with only 1 boundary component.
 
 
-# In[3]:
+# In[4]:
 
 
 def get_hom_vars(sig):
@@ -67,13 +67,19 @@ def get_hom_vars(sig):
         veering structure) of a veering triangulation.
         That is, an entry in the veering census.
         
-    Return type
-    ___________
-    tuple(sage.symbolic.expression.Expression)
+    Return type:
+        tuple(sage.symbolic.expression.Expression)
+        
+    Dependencies: None 
     '''
-    
     tri, angle = taut.isosig_to_tri_angle(sig)
     return tuple(var('a' + str(i)) for i in range(tri.homology().rank()))
+
+
+# In[5]:
+
+
+get_hom_vars(sig)
 
 
 # In[6]:
@@ -91,11 +97,9 @@ def get_extreme_surfs(sig): # NOT SURE IF I ACTUALLY NEED THIS FUNCTION FOR ANYT
         veering structure) of a veering triangulation.
         That is, an entry in the veering census.
     
-    Return type
-    ___________
-    list(sage.modules.vector_integer_dense.Vector_integer_dense)
+    Return type:
+        list(sage.modules.vector_integer_dense.Vector_integer_dense)
     '''
-    
     tri, angle = taut.isosig_to_tri_angle(sig)
     extreme_rays = taut_polytope.cone_in_homology(sig) # rays (in homology) spanning the fibered cone.
     rays = taut_polytope.taut_rays(sig) # These are rays spanning the cone of carried surfaces (not sure exactly what these are tbh...)
@@ -116,7 +120,13 @@ def get_extreme_surfs(sig): # NOT SURE IF I ACTUALLY NEED THIS FUNCTION FOR ANYT
     return extreme_surfs
 
 
-# In[12]:
+# In[7]:
+
+
+get_extreme_surfs(sig)
+
+
+# In[8]:
 
 
 def get_fibered_cone(sig):
@@ -130,16 +140,20 @@ def get_fibered_cone(sig):
         veering structure) of a veering triangulation.
         That is, an entry in the veering census.
     
-    Return type
-    ___________
-    sage.geometry.cone.ConvexRationalPolyhedralCone
+    Return type:
+        sage.geometry.cone.ConvexRationalPolyhedralCone
     '''
-    
     extreme_rays = taut_polytope.cone_in_homology(sig)
     return Cone(extreme_rays)
 
 
-# In[16]:
+# In[9]:
+
+
+get_fibered_cone(sig)
+
+
+# In[10]:
 
 
 def get_fibered_cone_plot(sig):
@@ -154,11 +168,9 @@ def get_fibered_cone_plot(sig):
         veering structure) of a veering triangulation.
         That is, an entry in the veering census.
     
-    Return type
-    ___________
-    sage.plot.graphics.Graphics
+    Return type:
+        sage.plot.graphics.Graphics
     '''
-    
     tri, angle = taut.isosig_to_tri_angle(sig)
     rank = tri.homology(1).rank()
     if rank == 2 or rank == 3:
@@ -167,10 +179,16 @@ def get_fibered_cone_plot(sig):
     return 'This function only works for manifolds with H_2(M,dM) (equivalently H_1(M)) dimension 2 or 3.'
 
 
-# In[19]:
+# In[11]:
 
 
-def get_spec(sig):
+get_fibered_cone_plot(sig)
+
+
+# In[12]:
+
+
+def get_spec(sig, method = 'fox'):
     '''Auxiliary function for the get_spec_at_e function.
     Returns the specialization of the taut polynomial at an
     arbitrary point in homology. Also used in 
@@ -182,16 +200,27 @@ def get_spec(sig):
         The isomorphism signature (together with 
         veering structure) of a veering triangulation.
         That is, an entry in the veering census.
+    method: str, optional
+        The method (from the Veering repository taut_polynomial file)
+        that we use to compute the taut_polynomial.
+        Default: 'fox'
+        Options: 'original', 'fox', 'tree' (fox and tree tend to be fastest I think)
     
-    Return type
-    ___________
-    sage.symbolic.expression.Expression
+    Return type:
+        sage.symbolic.expression.Expression
     '''
-    
+    if method not in ['original', 'fox', 'tree']:
+        raise Exception('Not a valid choice for method.')
+        
     tri, angle = taut.isosig_to_tri_angle(sig)
-    rank = tri.homology(1).rank()
+    #rank = tri.homology(1).rank()
     hom_vars = get_hom_vars(sig)
-    poly = taut_polynomial.taut_polynomial(tri, angle)
+    if method == 'original':
+        poly = taut_polynomial.taut_polynomial(tri, angle)
+    elif method == 'fox':
+        poly = taut_polynomial.taut_polynomial_via_fox_calculus(tri, angle)
+    elif method == 'tree':
+        poly = taut_polynomial.taut_polynomial_via_tree(tri, angle)
     unspec_monos = poly.monomials()
     monos = [] # the monomials in the specialization
     for i in range(poly.number_of_terms()):
@@ -204,15 +233,21 @@ def get_spec(sig):
     return spec
 
 
-# In[24]:
+# In[13]:
 
 
-def get_spec_at_e(sig):
-    '''Returns the specialization at e of the taut
-    polynomial. This amounts to substituting x = e
-    in the output of get_spec. Used in the
-    get_fibered_cone_and_levset_plot function as well
-    as the get_minimal_direction function.
+get_spec(sig)
+
+
+# In[14]:
+
+
+def get_spec_at_e(sig, method = 'fox'):
+    '''Returns the specialization (at an arb. point)
+    of the taut polynomial with e plugged in. This
+    amounts to substituting x = e in the output of
+    get_spec. Used in the get_fibered_cone_and_levset_plot
+    function as well as the get_minimal_direction function.
     
     Parameters
     __________
@@ -220,19 +255,31 @@ def get_spec_at_e(sig):
         The isomorphism signature (together with 
         veering structure) of a veering triangulation.
         That is, an entry in the veering census.
+    method: str, optional
+        The method (from the Veering repository taut_polynomial file)
+        that we use to compute the taut_polynomial.
+        Default: 'fox'
+        Options: 'original', 'fox', 'tree' (fox and tree tend to be fastest I think)
     
-    Return type
-    ___________
-    sage.symbolic.expression.Expression
+    Return type:
+        sage.symbolic.expression.Expression
     '''
-    
-    return get_spec(sig)(x = e)
+    if method not in ['original', 'fox', 'tree']:
+        raise Exception('Not a valid choice for method.')
+        
+    return get_spec(sig, method)(x = e)
 
 
-# In[30]:
+# In[15]:
 
 
-def get_fibered_cone_and_levset_plot(sig):
+get_spec_at_e(sig)
+
+
+# In[16]:
+
+
+def get_fibered_cone_and_levset_plot(sig, method = 'fox'):
     '''Plots both the fibered cone and the level set
     where the dilatation is equal to e (so log of the
     dilatation is 1). This is significant because on
@@ -247,28 +294,40 @@ def get_fibered_cone_and_levset_plot(sig):
         The isomorphism signature (together with 
         veering structure) of a veering triangulation.
         That is, an entry in the veering census.
+    method: str, optional
+        The method (from the Veering repository taut_polynomial file)
+        that we use to compute the taut_polynomial.
+        Default: 'fox'
+        Options: 'original', 'fox', 'tree' (fox and tree tend to be fastest I think)
     
-    Return type
-    ___________
-    sage.plot.graphics.Graphics
+    Return type:
+        sage.plot.graphics.Graphics
     '''
-    
+    if method not in ['original', 'fox', 'tree']:
+        raise Exception('Not a valid choice for method.')
+        
     tri, angle = taut.isosig_to_tri_angle(sig)
     rank = tri.homology(1).rank()
     if rank == 3:
-        levset = implicit_plot3d(get_spec_at_e(sig) == 0, (-10,10), (-10,10), (-10,10), cmap=['green'])
+        levset = implicit_plot3d(get_spec_at_e(sig, method) == 0, (-10,10), (-10,10), (-10,10), cmap=['green'])
         Plot = levset + get_fibered_cone_plot(sig)
         return Plot
     
     if rank == 2:
-        levset = implicit_plot(get_spec_at_e(sig) == 0, (-10,10), (-10,10), cmap=['green'])
+        levset = implicit_plot(get_spec_at_e(sig, method) == 0, (-10,10), (-10,10), cmap=['green'])
         Plot = levset + get_fibered_cone_plot(sig)
         return Plot
     
     return 'This function only works for manifolds with H_2(M,dM) (equivalently H_1(M)) dimension 2 or 3.'
 
 
-# In[33]:
+# In[17]:
+
+
+get_fibered_cone_and_levset_plot(sig)
+
+
+# In[18]:
 
 
 def get_C2M_to_C1M(sig):
@@ -283,9 +342,8 @@ def get_C2M_to_C1M(sig):
         veering structure) of a veering triangulation.
         That is, an entry in the veering census.
     
-    Return type
-    ___________
-    sage.matrix.matrix_integer_dense.Matrix_integer_dense
+    Return type:
+        sage.matrix.matrix_integer_dense.Matrix_integer_dense
     '''
     
     tri, angle = taut.isosig_to_tri_angle(sig)
@@ -310,7 +368,13 @@ def get_C2M_to_C1M(sig):
     return matrix(mat)
 
 
-# In[36]:
+# In[19]:
+
+
+get_C2M_to_C1M(sig)
+
+
+# In[20]:
 
 
 def get_2_chain_from_point_in_homology(sig):
@@ -328,9 +392,8 @@ def get_2_chain_from_point_in_homology(sig):
         veering structure) of a veering triangulation.
         That is, an entry in the veering census.
     
-    Return type
-    ___________
-    sage.modules.free_module.FreeModule_ambient_field_with_category.element_class
+    Return type:
+        sage.modules.free_module.FreeModule_ambient_field_with_category.element_class
     '''
     
     tri, angle = taut.isosig_to_tri_angle(sig)
@@ -361,7 +424,13 @@ def get_2_chain_from_point_in_homology(sig):
     return preimage
 
 
-# In[40]:
+# In[21]:
+
+
+get_2_chain_from_point_in_homology(sig)
+
+
+# In[22]:
 
 
 def get_Thurston_norm(sig):
@@ -377,9 +446,8 @@ def get_Thurston_norm(sig):
         veering structure) of a veering triangulation.
         That is, an entry in the veering census.
     
-    Return type
-    ___________
-    sage.symbolic.expression.Expression
+    Return type:
+        sage.symbolic.expression.Expression
     '''
             
     surf = get_2_chain_from_point_in_homology(sig)
@@ -391,10 +459,45 @@ def get_Thurston_norm(sig):
     return prenorm/2
 
 
-# In[51]:
+# In[23]:
 
 
-def get_spec_with_subs(sig, point):
+get_Thurston_norm(sig)
+
+
+# In[24]:
+
+
+def get_spec_with_subs(sig, point, method = 'fox'):
+    '''Returns the specialization of the taut
+    polynomial for a given point in homology.
+    This amounts to replacing the variables in the
+    output of get_spec(sig, method) with the numeric values
+    in point. Used in the get_dila_mathematica
+    function.
+    
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    point: tuple
+        The point in H_2(M, dM; Z) at which you want to
+        get the specialization.
+    method: str, optional
+        The method (from the Veering repository taut_polynomial file)
+        that we use to compute the taut_polynomial.
+        Default: 'fox'
+        Options: 'original', 'fox', 'tree' (fox and tree tend to be fastest I think)
+
+    
+    Return type:
+        sage.symbolic.expression.Expression
+    '''
+    if method not in ['original', 'fox', 'tree']:
+        raise Exception('Not a valid choice for method.')
+    
     keys = get_hom_vars(sig)
     
     if len(keys) != len(point):
@@ -410,20 +513,47 @@ def get_spec_with_subs(sig, point):
     for key, coord in zip(keys, point):
         substitute[key] = coord
     
-    poly = get_spec(sig).subs(substitute)
+    poly = get_spec(sig, method).subs(substitute)
     
     return poly
 
 
-# In[14]:
+# In[25]:
 
 
-def get_dila_mathematica(sig, point): # LOOK CAREFULLY INTO THIS FUNCTION...ALL CAPS COMMENT
-    '''This is an auxiliary function needed
-    for get_minimal_direction and 
-    get_min_norm_dila_log_mathematica_approx.
-    It takes in a point in homology and returns 
-    the dilatation of that point.'''
+get_spec_with_subs(sig, (-1,2.9,1))
+
+
+# In[26]:
+
+
+def get_dila_mathematica(sig, point, method = 'fox'): # LOOK CAREFULLY INTO THIS FUNCTION...ALL CAPS COMMENT
+    '''Returns the dilatation of the monodromy
+    associated to point in the manifold
+    specified by sig. Used in get_minimal_direction
+    and get_min_norm_dila_log_mathematica and
+    get_norm_dila_log_mathematica.
+    
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    point: tuple
+        The point in H_2(M, dM; Z) at which you want to
+        get the specialization.
+    method: str, optional
+        The method (from the Veering repository taut_polynomial file)
+        that we use to compute the taut_polynomial.
+        Default: 'fox'
+        Options: 'original', 'fox', 'tree' (fox and tree tend to be fastest I think)
+    
+    Return type:
+        sage.symbolic.expression.Expression (really just a number though)
+    '''
+    if method not in ['original', 'fox', 'tree']:
+        raise Exception('Not a valid choice for method.')
     
     keys = get_hom_vars(sig)
     
@@ -441,7 +571,7 @@ def get_dila_mathematica(sig, point): # LOOK CAREFULLY INTO THIS FUNCTION...ALL 
     #    substitute[key] = coord
     
     #poly = str(get_spec(sig).subs(substitute)) # substitute our point into the specialization with the variables
-    poly = str(get_spec_with_subs(sig, point))
+    poly = str(get_spec_with_subs(sig, point, method))
     #print(poly) # For testing
     poly = poly.replace("sqrt(x)", "Sqrt[x]") # NOT SURE WHEN THIS IS A PROBLEM...MAYBE THIS IS SOMETHING THAT NEEDS TO BE LOOKED INTO MORE GENERALLY?
     #print(poly) # For testing
@@ -455,11 +585,17 @@ def get_dila_mathematica(sig, point): # LOOK CAREFULLY INTO THIS FUNCTION...ALL 
     return max(root_nums) # and return the largest
 
 
-# In[37]:
+# In[27]:
+
+
+get_dila_mathematica(sig, (-1,2.9,1))
+
+
+# In[28]:
 
 
 def get_hom_dila_mathematica(sig, point): # WORK ON THIS
-    '''This function takes in a point in
+    '''DEPRECATED. This function takes in a point in
     homology and returns the homological
     dilatation of that point. Useful for seeing
     whether a given monodromy is orientable or
@@ -494,18 +630,37 @@ def get_hom_dila_mathematica(sig, point): # WORK ON THIS
     return max(root_nums) # and return the largest
 
 
-# In[16]:
+# In[32]:
 
 
-def get_minimal_direction(sig): # doesn't work for dimension 1 homology, but doesn't need to because the minimal direction is always just along the x-axis due to 1-dimensionality.
-    '''This function returns the vector in
-    the fibered cone pointing in the direction
-    of the minimal normalized dilatation.'''
+def get_minimal_direction(sig, method = 'fox'): # doesn't work for dimension 1 homology, but doesn't need to because the minimal direction is always just along the x-axis due to 1-dimensionality.
+    '''Returns a list of vectors which are the
+    candidates for the vector in the fibered cone
+    pointing in the direction of the minimal
+    normalized dilatation. COULD IT EVER RETURN MORE THAN 1??
     
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    method: str, optional
+        The method (from the Veering repository taut_polynomial file)
+        that we use to compute the taut_polynomial.
+        Default: 'fox'
+        Options: 'original', 'fox', 'tree' (fox and tree tend to be fastest I think)
+    
+    Return type:
+        tuple
+    '''
+    if method not in ['original', 'fox', 'tree']:
+        raise Exception('Not a valid choice for method.')
+        
     tri, angle = taut.isosig_to_tri_angle(sig)
     variables = get_hom_vars(sig)
     f = str(get_Thurston_norm(sig))
-    g = str(get_spec_at_e(sig))
+    g = str(get_spec_at_e(sig, method))
     g = g.replace('e', 'E') # for mathematica
     var_string = ''
     for variable in variables: # need to turn the variables into a string for mathematica
@@ -517,20 +672,49 @@ def get_minimal_direction(sig): # doesn't work for dimension 1 homology, but doe
     # Now we solve a Lagrange multipliers problem: minimze the Thurston norm subject to lying on the level set where the normalized dilatation is just equal to the Thurston norm.
     sols = m('sols = NSolve[{Grad[' + f + ', {' + var_string + '}] == L*Grad[' + g + ', {' + var_string + '}], ' + g + ' == 0}, {' + var_string + ',L}, Reals]')
     
+    out = []
     for i in range(len(sols)):
         test_point = [m('a' + str(j) + '/.sols[[' + str(i+1) + ']]') for j in range(len(variables))]
         if get_fibered_cone(sig).interior_contains(tuple(test_point)):
-            return tuple(test_point)
+            out.append(tuple(test_point))
+    return out
 
 
-# In[17]:
+# In[33]:
 
 
-def get_norm_dila_log_mathematica(sig, point):
-    '''This function returns the normalized
-    dilatation (in the log form, not the 
-    exponential form) of a homology class.'''
+get_minimal_direction(sig)
+
+
+# In[30]:
+
+
+def get_norm_dila_log_mathematica(sig, point, method = 'fox'):
+    '''Returns the normalized dilatation (in
+    the log form, not the exponential form)
+    of a homology class.
     
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    point: tuple
+        The point in H_2(M, dM; Z) at which you want to
+        get the normalized dilatation.
+    method: str, optional
+        The method (from the Veering repository taut_polynomial file)
+        that we use to compute the taut_polynomial.
+        Default: 'fox'
+        Options: 'original', 'fox', 'tree' (fox and tree tend to be fastest I think)
+    
+    Return type:
+        sage.symbolic.expression.Expression
+    '''
+    if method not in ['original', 'fox', 'tree']:
+        raise Exception('Not a valid choice for method.')
+        
     keys = get_hom_vars(sig)
     
     if len(keys) != len(point):
@@ -546,52 +730,111 @@ def get_norm_dila_log_mathematica(sig, point):
     for key, coord in zip(keys, point):
         substitute[key] = coord
     
-    return get_Thurston_norm(sig).subs(substitute)*math.log(get_dila_mathematica(sig, point))
+    return get_Thurston_norm(sig).subs(substitute)*math.log(get_dila_mathematica(sig, point, method))
 
 
-# In[18]:
+# In[31]:
 
 
-def get_min_norm_dila_log_mathematica_approx(sig):
+type(get_norm_dila_log_mathematica(sig, (-1, 2.9, 1)))
+
+
+# In[32]:
+
+
+def get_min_norm_dila_log_mathematica_approx(sig, method = 'fox', rounding = 1):
     '''Returns (approximately) the minimal normalized
-    dilatation for the given fibered face of the given 3-manifold.'''
+    dilatation for the given fibered face of the given 3-manifold.
     
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    method: str, optional
+        The method (from the Veering repository taut_polynomial file)
+        that we use to compute the taut_polynomial.
+        Default: 'fox'
+        Options: 'original', 'fox', 'tree' (fox and tree tend to be fastest I think)
+    rounding: int, optional
+        The number of decimal places to which you want to round
+        the entries of the minimal direction to speed up computation.
+        Default: 1.
+    
+    Return type:
+        sage.symbolic.expression.Expression
+    '''
+    if method not in ['original', 'fox', 'tree']:
+        raise Exception('Not a valid choice for method.')
+        
     tri, angle = taut.isosig_to_tri_angle(sig)
     if tri.homology(1).rank() == 1:
         if get_fibered_cone(sig).contains(1,):
-            return get_norm_dila_log_mathematica(sig, (1,)) # These fibered cones always point along the positive or negative x-axis.
+            return get_norm_dila_log_mathematica(sig, (1,), method) # These fibered cones always point along the positive or negative x-axis.
         else:
-            return get_norm_dila_log_mathematica(sig, (-1,))
-    min_direction = get_minimal_direction(sig)
-    point = tuple(round(direction, 1) for direction in min_direction) # round for speed purposes
-    return get_norm_dila_log_mathematica(sig, point)
+            return get_norm_dila_log_mathematica(sig, (-1,), method)
+    min_direction = get_minimal_direction(sig, method)[0] # REMOVE THE [0] IF GET_MINIMAL_DIRECTION CHANGES OUTPUT TO JUST ONE POINT!
+    point = tuple(round(direction, rounding) for direction in min_direction) # round for speed purposes
+    return get_norm_dila_log_mathematica(sig, point, method)
 
 
-# In[19]:
+# In[33]:
+
+
+get_min_norm_dila_log_mathematica_approx(sig)
+
+
+# In[34]:
 
 
 def get_boundary_triangulations(sig):
-    '''This function returns a list of ordered pairs.
+    '''Returns a list of ordered pairs.
     Each element of the list corresponds to a boundary
     component of the 3-manifold. The first entry in the
     ordered pair gives a Regina triangulation for that
     component, and the second entry gives how it is
     labeled. (see Regina's buildLink() and
-    buildLinkInclusion() for details).'''
+    buildLinkInclusion() for details).
     
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    
+    Return type:
+        list[tuple(regina.engine.Triangulation2, regina.engine.Isomorphism3)]
+    '''
     tri, angle = taut.isosig_to_tri_angle(sig)
     return [(vertex.buildLink(),vertex.buildLinkInclusion()) for vertex in tri.vertices()]
 
 
-# In[20]:
+# In[35]:
+
+
+get_boundary_triangulations(sig)
+
+
+# In[36]:
 
 
 def get_C2dM_to_C1dM(sig):
-    '''This function returns a list of matrices; one for each
-    boundary component of the triangulation giving the boundary
-    map from 2-chains to 1-chains. It returns it as a sage matrix,
-    not a regina matrix.'''
+    '''Returns a list of matrices; one for each
+    boundary component of the triangulation giving
+    the boundary map from 2-chains to 1-chains.
     
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    
+    Return type:
+        list[sage.matrix.matrix_integer_dense.Matrix_integer_dense]
+    '''
     tri, angle = taut.isosig_to_tri_angle(sig)
     retval = []
     for vertex in tri.vertices():
@@ -602,15 +845,30 @@ def get_C2dM_to_C1dM(sig):
     return retval
 
 
-# In[21]:
+# In[37]:
+
+
+get_C2dM_to_C1dM(sig)
+
+
+# In[38]:
 
 
 def get_C1dM_to_C0dM(sig):
-    '''This function returns a list of matrices; one for each
-    boundary component of the triangulation giving the boundary
-    map from 1-chains to 0-chains. It returns it as a sage matrix,
-    not a regina matrix.'''
+    '''Returns a list of matrices; one for each
+    boundary component of the triangulation giving
+    the boundary map from 1-chains to 0-chains.
     
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    
+    Return type:
+        list[sage.matrix.matrix_integer_dense.Matrix_integer_dense]
+    '''
     tri, angle = taut.isosig_to_tri_angle(sig)
     retval = []
     for vertex in tri.vertices():
@@ -621,15 +879,31 @@ def get_C1dM_to_C0dM(sig):
     return retval
 
 
-# In[22]:
+# In[39]:
+
+
+get_C1dM_to_C0dM(sig)
+
+
+# In[40]:
 
 
 def get_boundary_homology_with_gens(sig):
-    '''This function returns a list of homology
-    groups with generators; one for each boundary
-    component. Having the generators will help
-    determine the boundary map from the LES in homology.'''
+    '''Returns a list of homology groups with
+    generators; one for each boundary component.
+    Having the generators will help determine the
+    boundary map from the LES in homology.
     
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    
+    Return type:
+        list[list[tuple(sage.homology.homology_group.HomologyGroup_class_with_category, sage.homology.chain_complex.ChainComplex_class_with_category.element_class)]]
+    '''
     tri, angle = taut.isosig_to_tri_angle(sig)
     retval = []
     for i in range(tri.countBoundaryComponents()):
@@ -639,26 +913,43 @@ def get_boundary_homology_with_gens(sig):
     return retval
 
 
-# In[23]:
+# In[41]:
+
+
+get_boundary_homology_with_gens(sig)
+
+
+# In[42]:
 
 
 def get_prongs_matrix(sig):
-    '''This function outputs a matrix which,
-    when multiplying a 2-chain by this matrix, 
-    gives the total number of prongs on each of the 
-    boundary components. To get the number of
-    prongs on any given singularity, note that
-    all singularities coming from a given boundary
-    component have the same number of prongs. So
-    we simply divide the number of singularities
-    on a given boundary component by the total number
-    of prongs on that boundary component.'''
+    '''Returns a matrix which, when multiplying a
+    2-chain by this matrix, gives the total number
+    of prongs on each of the boundary components.
+    To get the number of prongs on any given
+    singularity, note that all singularities
+    coming from a given boundary component have the
+    same number of prongs. So we simply divide the
+    number of singularities on a given boundary
+    component by the total number of prongs on that
+    boundary component. This function works by looking
+    at Anna Parlak's lower track. Specifically for each
+    triangle, look at its bottom embedding. The lower
+    track contributes a prong on the vertex shared with
+    the top edge (see pictures in her paper). So we loop
+    over all triangles and find the vertex to which the
+    lower track contributes a prong.
     
-    '''This function works by looking at Anna Parlak's lower track. Specifically for each triangle,
-    look at its bottom embedding. The lower track contributes a prong on the vertex shared with the
-    top edge (see pictures in her paper). So we loop over all triangles and find the vertex to which
-    the lower track contributes a prong.'''
-        
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    
+    Return type:
+        sage.matrix.matrix_integer_dense.Matrix_integer_dense
+    ''' 
     tri, angle = taut.isosig_to_tri_angle(sig)
     
     mat = [[0 for i in range(tri.countVertices())] for j in range(tri.countTriangles())] # initialize our matrix
@@ -682,7 +973,13 @@ def get_prongs_matrix(sig):
     return matrix(mat).transpose()
 
 
-# In[24]:
+# In[43]:
+
+
+get_prongs_matrix(sig)
+
+
+# In[44]:
 
 
 def get_boundary_tri_labelings_from_tet_and_vert(sig):
@@ -691,10 +988,20 @@ def get_boundary_tri_labelings_from_tet_and_vert(sig):
     keys are tuples giving a tetrahedron number and
     a vertex on that tetrahedron, and associated value
     is a tuple where the first entry is the boundary
-    component number which that vertex lies on and the
+    component number on which that vertex lies and the
     second entry is the index of the associated triangle
-    in the triangulation of that boundary component.'''
+    in the triangulation of that boundary component.
     
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    
+    Return type:
+        dict{tuple(int, int) : tuple(int, int)}
+    '''
     tri, angle = taut.isosig_to_tri_angle(sig)
     assocs = {}
     bndries = [(vertex.buildLink(), vertex.buildLinkInclusion()) for vertex in tri.vertices()]
@@ -709,19 +1016,36 @@ def get_boundary_tri_labelings_from_tet_and_vert(sig):
     return assocs
 
 
-# In[25]:
+# In[45]:
+
+
+get_boundary_tri_labelings_from_tet_and_vert(sig)
+
+
+# In[46]:
 
 
 def get_C2M_to_C1dM(sig):
-    '''This function returns a list of matrices.
-    Each martix corresponds to one boundary component.
-    They each give the map assigning triangles in the
-    triangulation of the 3-manifold to the edges in each
-    respective boundary component coming from that triangle.
-    The signs are in agreement with the veering orientations.
-    To see how this function was constructed, it helps to look
-    at pictures in Dilas Week 2 on notability.'''
+    '''Returns a list of matrices. Each matrix
+    corresponds to one boundary component. They
+    each give the map assigning triangles in the
+    triangulation of the 3-manifold to the edges
+    in each respective boundary component coming
+    from that triangle. The signs are in agreement
+    with the veering orientations. To see how this
+    function was constructed, it helps to look at
+    pictures in Dilas Week 2 on notability.<<<<<< UPLOAD PICTURES
     
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    
+    Return type:
+        list[sage.matrix.matrix_integer_dense.Matrix_integer_dense]
+    '''
     tri, angle = taut.isosig_to_tri_angle(sig)
     bndries = [(vertex.buildLink(),vertex.buildLinkInclusion()) for vertex in tri.vertices()] # build each boundary component triangulation and the data encoding its inclusion
     assocs = get_boundary_tri_labelings_from_tet_and_vert(sig) # get the dictionary with keys = (tet, vertex) and associated value (boundary component, triangle number)
@@ -792,15 +1116,33 @@ def get_C2M_to_C1dM(sig):
     return retval
 
 
-# In[26]:
+# In[47]:
+
+
+get_C2M_to_C1dM(sig)
+
+
+# In[48]:
 
 
 def get_LES_boundary_maps(sig):
-    '''This function outputs a list (one entry for each
-    boundary component) of doubles. Each double represents
-    the image of an arbitrary homology class under the boundary
-    map for the LES sequence in homology H_2(M) --> H_1(dM).'''
+    '''Returns a list (one entry for each
+    boundary component) of doubles. Each
+    double represents the image of an
+    arbitrary homology class under the
+    boundary map for the LES sequence in
+    homology H_2(M) --> H_1(dM).
     
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    
+    Return type:
+        list[tuple(sage.symbolic.expression.Expression)]
+    '''
     tri, angle = taut.isosig_to_tri_angle(sig)
     retval = []
     for i in range(tri.countVertices()): # loop over the boundary components
@@ -831,15 +1173,32 @@ def get_LES_boundary_maps(sig):
     return retval
 
 
-# In[27]:
+# In[49]:
+
+
+get_LES_boundary_maps(sig)
+
+
+# In[50]:
 
 
 def get_LES_boundary_matrices(sig):
-    '''This function outputs a list (one entry for each
-    boundary component) of matrices. Each matrix represents
-    the the boundary map for the LES sequence in homology
-    H_2(M) --> H_1(dM).'''
+    '''Returns a list (one entry for each
+    boundary component) of matrices. Each
+    matrix represents the the boundary map
+    for the LES sequence in homology
+    H_2(M) --> H_1(dM).
     
+    Parameters
+    __________
+    sig: str
+        The isomorphism signature (together with 
+        veering structure) of a veering triangulation.
+        That is, an entry in the veering census.
+    
+    Return type:
+        list[sage.matrix.matrix_symbolic_dense.Matrix_symbolic_dense]
+    ''' 
     tri, angle = taut.isosig_to_tri_angle(sig)
     retval = []
     for i in range(tri.countVertices()): # loop over the boundary components
@@ -874,7 +1233,13 @@ def get_LES_boundary_matrices(sig):
     return retval
 
 
-# In[28]:
+# In[51]:
+
+
+get_LES_boundary_matrices(sig)
+
+
+# In[52]:
 
 
 #'''This was just to test that my get_C2M_to_C1dM function was working correctly. Used the KKT example.'''
@@ -894,7 +1259,7 @@ def get_LES_boundary_matrices(sig):
 
 # Note that this is not the fastest way to deal with specific examples since every function recalculates everything it needs to.
 
-# In[29]:
+# In[ ]:
 
 
 def get_num_punctures(sig, point):
@@ -925,7 +1290,7 @@ def get_num_punctures(sig, point):
     return [retval, sum(retval)]
 
 
-# In[30]:
+# In[ ]:
 
 
 def get_genus(sig, point):
@@ -950,7 +1315,7 @@ def get_genus(sig, point):
     return (t_norm + 2 - num_punctures)/2
 
 
-# In[31]:
+# In[ ]:
 
 
 def get_num_prongs(sig, point): # DON'T THINK THIS WORKS WITH VARIABLES
@@ -985,7 +1350,7 @@ def get_num_prongs(sig, point): # DON'T THINK THIS WORKS WITH VARIABLES
     return [[total_prongs_each_boundary_comp[i]/punctures[0][i]]*int(punctures[0][i]) for i in range(tri.countBoundaryComponents())]
 
 
-# In[32]:
+# In[ ]:
 
 
 # Taken from:
@@ -1021,7 +1386,7 @@ def mysolve(A,V):
     return vector([X[i] for i in range(m)])
 
 
-# In[33]:
+# In[ ]:
 
 
 def get_carried_2_chain(sig, point):
@@ -1051,7 +1416,7 @@ def get_carried_2_chain(sig, point):
     return mysolve(A,V)
 
 
-# In[34]:
+# In[ ]:
 
 
 def test_a_point(sig, point):
