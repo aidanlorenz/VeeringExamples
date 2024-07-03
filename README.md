@@ -4,7 +4,8 @@ The code in this repository was written as part of the author's PhD studies.
 
 Dependencies include [Sage 10.1](https://www.sagemath.org/index.html), [Mathematica](https://www.wolfram.com/mathematica/?src=google&416&gad_source=1&gclid=CjwKCAiAopuvBhBCEiwAm8jaMVFCN6LFjhjLvtFWyESeESXPOsPQ2CPjl-eNtUbDTQMpBW2gK9Nl5RoCPJ4QAvD_BwE) (installed with a command line interface that runs when given the `math` command), [Regina](https://regina-normal.github.io/), and [Parlak, Segerman, and Schleimer's Veering repository](https://github.com/henryseg/Veering).
 
-The most important folder is `General` which contains folders with 2-dimensional manifold examples, 3-dimensional manifold examples, and the most important file `VeeringGeneralFunctions.ipynb` where all the methods are written.
+The most important file is `VeeringGeneralFunctions.ipynb` where all the methods are written.
+The two examples folders contain example notebooks of how one might use the functions in `VeeringGeneralFunctions.ipynb` and also some data/examples relevant to the Associated works (thesis and paper; see bottom of readme).
 
 `DifferentFace.ipynb` has some examples of things that might be malfunctioning.
 
