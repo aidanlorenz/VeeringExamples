@@ -82,11 +82,32 @@ which, unsurprisingly, is larger than the minimum we found previously.
 We can even determine the number of singularities on the minimal surface representative for the class in the orbits corresponding to each boundary component of $M$.
 This is just the $\gcd$ of the image under the boundary maps:
 $$
-\gcd\left(\partial_0\left(2,1,3\right)\right) = \gcd\left(\begin{pmatrix} -3 & 6 & -2 \\ 0 & 1 & 0 \end{pmatrix} \cdot \begin{pmatrix} 2 \\ 1 \\ 3 \end{pmatrix}\right) = \gcd\left(-6, 1\right) = 1
+\gcd\left(\partial_0\left(2,1,3\right)\right) = \gcd\left(\left(\begin{array}{cc} 
+-3 & 6 & -2 \\
+0 & 1 & 0
+\end{array}\right) \cdot \left(\begin{array}{cc} 
+2 \\ 
+1 \\
+3
+\end{array}\right)\right) = \gcd\left(-6, 1\right) = 1
 \\
-\gcd\left(\partial_1\left(2,1,3\right)\right) = \gcd\left(\begin{pmatrix} -1 & 3 & 0 \\ 1 & 0 & 0 \end{pmatrix} \cdot \begin{pmatrix} 2 \\ 1 \\ 3 \end{pmatrix}\right) = \gcd\left(1, 2\right) = 1
+\gcd\left(\partial_1\left(2,1,3\right)\right) = \gcd\left(\left(\begin{array}{cc} 
+-1 & 3 & 0 \\
+1 & 0 & 0
+\end{array}\right) \cdot \left(\begin{array}{cc} 
+2 \\ 
+1 \\
+3
+\end{array}\right)\right) = \gcd\left(1, 2\right) = 1
 \\
-\gcd\left(\partial_2\left(2,1,3\right)\right) = \gcd\left(\begin{pmatrix} 0 & 0 & -1 \\ 0 & -2 & 0 \end{pmatrix} \cdot \begin{pmatrix} 2 \\ 1 \\ 3 \end{pmatrix}\right) = \gcd\left(-3, -2\right) = 1
+\gcd\left(\partial_2\left(2,1,3\right)\right) = \gcd\left(\left(\begin{array}{cc} 
+0 & 0 & -1 \\
+0 & -2 & 0
+\end{array}\right) \cdot \left(\begin{array}{cc} 
+2 \\ 
+1 \\
+3
+\end{array}\right)\right) = \gcd\left(-3, -2\right) = 1
 $$
 and hence the minimal surface representative for $(2,1,3)$ has $3$ singularities; $1$ corresponding to each of the $3$ boundary components of $M$.
 
