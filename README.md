@@ -81,34 +81,7 @@ $$\overline{\lambda}(2,1,3) = \|(2,1,3)\|\log \lambda(2,1,3) = 5\log(2.296630262
 which, unsurprisingly, is larger than the minimum we found previously.
 We can even determine the number of singularities on the minimal surface representative for the class in the orbits corresponding to each boundary component of $M$.
 This is just the $\gcd$ of the image under the boundary maps:
-$$
-\gcd\left(\partial_0\left(2,1,3\right)\right) = \gcd\left(\left(\begin{array}{cc} 
--3 & 6 & -2 \\
-0 & 1 & 0
-\end{array}\right) \cdot \left(\begin{array}{cc} 
-2 \\ 
-1 \\
-3
-\end{array}\right)\right) = \gcd\left(-6, 1\right) = 1
-\\
-\gcd\left(\partial_1\left(2,1,3\right)\right) = \gcd\left(\left(\begin{array}{cc} 
--1 & 3 & 0 \\
-1 & 0 & 0
-\end{array}\right) \cdot \left(\begin{array}{cc} 
-2 \\ 
-1 \\
-3
-\end{array}\right)\right) = \gcd\left(1, 2\right) = 1
-\\
-\gcd\left(\partial_2\left(2,1,3\right)\right) = \gcd\left(\left(\begin{array}{cc} 
-0 & 0 & -1 \\
-0 & -2 & 0
-\end{array}\right) \cdot \left(\begin{array}{cc} 
-2 \\ 
-1 \\
-3
-\end{array}\right)\right) = \gcd\left(-3, -2\right) = 1
-$$
+![Matrices picture](docs/ReadMeMats.png)
 and hence the minimal surface representative for $(2,1,3)$ has $3$ singularities; $1$ corresponding to each of the $3$ boundary components of $M$.
 
 One can even determine the number of prongs of the invariant foliations for the monodromy associated to a fibered class at each singularity; one might investigate the example files in this repository to see such examples.
